@@ -62,23 +62,18 @@ class App extends React.Component {
     const { mess, newMess } = this.state;
 
     return (
-        <div className="container">
-          <div className="chatarena">{this.renderMesss(mess)}</div>
-          <div className="chatform">
-          <span>Name:</span>
-          <input value={newMess.title} onChange={this.handleAdd} />
-          <Part mess={newMess} onChangeText={this.onChangeText} />
-          <button onClick={this.handleSubmit}>Send</button>
-          <hr />
+      <div className="container">
+        <div className="chatarena">{this.renderMesss(mess)}</div>
+        <div className="chatform">
+          <div className="nameform">
+            <span>Name:</span>
+            <input value={newMess.title} onChange={this.handleAdd} />
           </div>
-          <div className="chatform">
-          <span>Name:</span>
-          <input value={newMess.title} onChange={this.handleAdd} />
           <Part mess={newMess} onChangeText={this.onChangeText} />
-          <button onClick={this.handleSubmit}>Send</button>
+          <button className="sendform" onClick={this.handleSubmit}>Send</button>
           <hr />
-          </div>
         </div>
+      </div>
     );
   }
 }

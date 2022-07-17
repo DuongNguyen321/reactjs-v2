@@ -2,7 +2,7 @@ import React from "react";
 
 const Part = ({ mess, onChangeText }) => {
   return (
-    <div>
+    <div className="messform">
       Message:
       <input
         value={mess.description}
