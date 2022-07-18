@@ -12,6 +12,15 @@ body {
 	min-height: 100vh;
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #efefef;
+	color: #333;
+}
+::selection {
+	background-color: beige;
+	color: #111;
+}
+::-webkit-scrollbar{
+	width: 0;
+	height: 0;
 }
 .container {
 	height: 100%;
@@ -27,6 +36,7 @@ body {
 		align-content: center;
 		gap: 5px;
 		margin-bottom: 12em;
+		margin-top: 5px;
 		.message {
 			width: auto;
 			min-width: 50%;
@@ -34,8 +44,6 @@ body {
 			height: auto;
 			padding: 5px;
 			border: 1px solid #333;
-			margin-bottom: 10px;
-			margin-top: 10px;
 			display: flex;
 			justify-content: flex-start;
 			flex-direction: column;
@@ -52,7 +60,6 @@ body {
 				&:hover {
 					background-color: blanchedalmond;
 					border-radius: 10px;
-					padding-left: 5px;
 				}
 			}
 			.mess {
@@ -62,7 +69,6 @@ body {
 				&:hover {
 					background-color: blanchedalmond;
 					border-radius: 10px;
-					padding-left: 5px;
 				}
 			}
 		}
