@@ -12,7 +12,6 @@ export default class MainChat extends React.Component {
       },
     };
   }
-
   renderMesss = (mess) =>
     mess.map((mess, index) => {
       return (
@@ -22,7 +21,6 @@ export default class MainChat extends React.Component {
         </div>
       );
     });
-
   handleEditMess = (value, editIndex) => {
     const { mess } = this.state;
     const newMesss = mess.map((mess, index) => {
@@ -33,13 +31,11 @@ export default class MainChat extends React.Component {
     });
     this.setState({ mess: newMesss });
   };
-
   handleAdd = (e) => {
     const { newMess } = this.state;
     newMess.title = e.target.value;
     this.setState({ newMess: newMess });
   };
-
   handleSubmit = (e) => {
     const { newMess, mess } = this.state;
     e.preventDefault();
@@ -49,13 +45,11 @@ export default class MainChat extends React.Component {
     });
     this.setState({ mess });
   };
-
   onChangeText = (description) => {
     const { newMess } = this.state;
     newMess.description = description;
     this.setState({ newMess });
   };
-
   render() {
     const { mess, newMess } = this.state;
     return (
