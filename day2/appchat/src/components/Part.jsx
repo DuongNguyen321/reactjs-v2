@@ -5,7 +5,7 @@ const Part = ({ mess, onChangeText }) => {
     <div className="messform">
       Message:
       <input
-        value={mess.description}
+        value={mess.message}
         onChange={(e) => onChangeText(e.target.value)}
       />
     </div>
