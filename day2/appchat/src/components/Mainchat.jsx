@@ -13,7 +13,7 @@ export default class MainChat extends React.Component {
     };
   }
   componentDidMount = () => {
-    fetch("http://localhost:3004/mess")
+    fetch("https://api4chat.herokuapp.com/mess")
       .then((response) => response.json())
       .then((data) => {
         this.setState({
@@ -54,13 +54,11 @@ export default class MainChat extends React.Component {
       message: newMess.message,
     });
     this.setState({ mess });
-    fetch('http://localhost:3004/mess', {
-      method: 'post',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-           "mess": this.state.newMess
-      })
-   });
+    fetch("https://api4chat.herokuapp.com/mess", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(this.state.newMess),
+    });
   };
   onChangeText = (message) => {
     const { newMess } = this.state;
