@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"; 
 
 import Part from "./Part.jsx";
 export default class MainChat extends React.Component {
@@ -15,7 +15,6 @@ export default class MainChat extends React.Component {
 
   renderMesss = (mess) =>
     mess.map((mess, index) => {
-      console.log(mess);
       return (
         <div className="message" key={index}>
           <h1 className="name">{mess.title}</h1>
@@ -41,13 +40,13 @@ export default class MainChat extends React.Component {
     this.setState({ newMess: newMess });
   };
 
-  handleSubmit = () => {
+  handleSubmit = (e) => {
     const { newMess, mess } = this.state;
+    e.preventDefault();
     mess.push({
       title: newMess.title,
       description: newMess.description,
     });
-    console.log(mess);
     this.setState({ mess });
   };
 
@@ -59,11 +58,10 @@ export default class MainChat extends React.Component {
 
   render() {
     const { mess, newMess } = this.state;
-
     return (
       <div className="container">
         <div className="chatarena">{this.renderMesss(mess)}</div>
-        <div className="chatform">
+        <form action="" className="chatform">
           <div className="nameform">
             <span>Name:</span>
             <input value={newMess.title} onChange={this.handleAdd} />
@@ -73,7 +71,7 @@ export default class MainChat extends React.Component {
             Send
           </button>
           <hr />
-        </div>
+        </form>
       </div>
     );
   }
