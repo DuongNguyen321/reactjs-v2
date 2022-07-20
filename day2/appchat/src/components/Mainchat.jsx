@@ -1,10 +1,14 @@
 import React from "react";
 import Part from "./Part.jsx";
+import FormLogin from "./FormLogin";
+import Name from "./Name.jsx";
 
 export default class MainChat extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      error: null,
+      isLoaded: false,
       mess: [],
       newMess: {
         name: "",
@@ -12,15 +16,51 @@ export default class MainChat extends React.Component {
       },
     };
   }
-  componentDidMount = () => {
-    fetch("https://api4chat.herokuapp.com/mess")
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState({
-          mess: data,
-        });
-      });
-  };
+
+  // const { user, isAuthenticated } = useAuth0();
+  // if (isAuthenticated === true) {
+  //   newMess.name = user.name;
+  // } else {
+  //   newMess.name = "Ẩn Danh";
+  // }
+
+    componentDidMount() {
+      fetch("https://api4chat.herokuapp.com/mess")
+        .then((res) => res.json())
+        .then(
+          (data) => {
+            this.setState({
+              isLoaded: true,
+              mess: data,
+            });
+          },
+          (error) => {
+            this.setState({
+              isLoaded: true,
+              error,
+            });
+          }
+        );
+    }
+
+    componentDidUpdate() {
+      fetch("https://api4chat.herokuapp.com/mess")
+        .then((res) => res.json())
+        .then(
+          (data) => {
+            this.setState({
+              isLoaded: true,
+              mess: data,
+            });
+          },
+          (error) => {
+            this.setState({
+              isLoaded: true,
+              error,
+            });
+          }
+        );
+    }
 
   renderMess = (mess) =>
     mess.map((mess, index) => {
@@ -65,32 +105,35 @@ export default class MainChat extends React.Component {
     newMess.message = message;
     this.setState({ newMess });
   };
+  handleLogin = () => {
+    let loginForm = document.querySelector(".login-form-container");
+    loginForm.classList.add("active");
+  };
+
   render() {
     const { mess, newMess } = this.state;
     return (
       <div className="container">
+        <FormLogin />
         <div className="chatarena">{this.renderMess(mess)}</div>
         <form action="" className="chatform">
           <div className="nameform">
-            <span>Name:</span>
-            <input value={newMess.name} onChange={this.handleAdd} />
+            <h3><Name/></h3>
+            <input  value={newMess.name} onChange={this.handleAdd}/>
           </div>
           <Part mess={newMess} onChangeText={this.onChangeText} />
-          <button className="sendform" onClick={this.handleSubmit}>
+          <button
+            type="submit"
+            className="sendform"
+            onClick={this.handleSubmit}
+          >
             Send
           </button>
-          <hr />
-        </form>
-        <form action="" className="chatform">
-          <div className="nameform">
-            <span>Name:</span>
-            <input value={newMess.name} onChange={this.handleAdd} />
-          </div>
-          <Part mess={newMess} onChangeText={this.onChangeText} />
-          <button className="sendform" onClick={this.handleSubmit}>
-            Send
-          </button>
-          <hr />
+          <i
+            className="fas fa-user"
+            id="login-btn"
+            onClick={this.handleLogin}
+          />
         </form>
       </div>
     );
