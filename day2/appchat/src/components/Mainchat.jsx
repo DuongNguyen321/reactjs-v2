@@ -24,43 +24,43 @@ export default class MainChat extends React.Component {
   //   newMess.name = "Ẩn Danh";
   // }
 
-    componentDidMount() {
-      fetch("https://api4chat.herokuapp.com/mess")
-        .then((res) => res.json())
-        .then(
-          (data) => {
-            this.setState({
-              isLoaded: true,
-              mess: data,
-            });
-          },
-          (error) => {
-            this.setState({
-              isLoaded: true,
-              error,
-            });
-          }
-        );
-    }
+  componentDidMount() {
+    fetch("https://api4chat.herokuapp.com/mess")
+      .then((res) => res.json())
+      .then(
+        (data) => {
+          this.setState({
+            isLoaded: true,
+            mess: data,
+          });
+        },
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error,
+          });
+        }
+      );
+  }
 
-    componentDidUpdate() {
-      fetch("https://api4chat.herokuapp.com/mess")
-        .then((res) => res.json())
-        .then(
-          (data) => {
-            this.setState({
-              isLoaded: true,
-              mess: data,
-            });
-          },
-          (error) => {
-            this.setState({
-              isLoaded: true,
-              error,
-            });
-          }
-        );
-    }
+  componentDidUpdate() {
+    fetch("https://api4chat.herokuapp.com/mess")
+      .then((res) => res.json())
+      .then(
+        (data) => {
+          this.setState({
+            isLoaded: true,
+            mess: data,
+          });
+        },
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error,
+          });
+        }
+      );
+  }
 
   renderMess = (mess) =>
     mess.map((mess, index) => {
@@ -112,14 +112,37 @@ export default class MainChat extends React.Component {
 
   render() {
     const { mess, newMess } = this.state;
+    function Checkuser() {
+      const nameuser = document.querySelector(".container h3").className;
+      const chatform = document.querySelector(".container .chatform");
+      const loginform = document.querySelector(".container .loginform");
+      // console.log(loginform);
+      if (nameuser ==="userlogin") {
+        chatform.classList.add("active");
+        loginform.classList.remove("active");
+      }
+       else if (nameuser === "notuser") {
+        chatform.classList.remove("active");
+        loginform.classList.add("active");
+      }
+    }
+    const checkuser = setTimeout(Checkuser, 100);
+
+    function myStopFunction() {
+      clearTimeout(checkuser);
+    }
     return (
       <div className="container">
         <FormLogin />
         <div className="chatarena">{this.renderMess(mess)}</div>
+          <Name/>
         <form action="" className="chatform">
           <div className="nameform">
-            <h3><Name/></h3>
-            <input  value={newMess.name} onChange={this.handleAdd}/>
+            <input
+              value={newMess.name}
+              onChange={this.handleAdd}
+              placeholder="Bạn có thể dùng nickname để chat"
+            />
           </div>
           <Part mess={newMess} onChangeText={this.onChangeText} />
           <button
@@ -135,6 +158,12 @@ export default class MainChat extends React.Component {
             onClick={this.handleLogin}
           />
         </form>
+        <div className="loginform">
+          <h3>Bạn đang ẩn danh !</h3>
+          <button type="button" className="btn" onClick={this.handleLogin}>
+            Đăng nhập ngay
+          </button>
+        </div>
       </div>
     );
   }

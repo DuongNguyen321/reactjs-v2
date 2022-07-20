@@ -1,8 +1,8 @@
 import Login from "./login/Login";
 
-export default function FormLogin(props) {
+export default function FormLogin() {
 
-    const handleCloselogin = (e) => {
+    const handleCloselogin = () => {
       let loginForm = document.querySelector(".login-form-container");
       loginForm.classList.remove("active");
     };
