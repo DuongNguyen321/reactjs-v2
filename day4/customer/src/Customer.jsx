@@ -7,11 +7,13 @@ export default class Customers extends React.Component {
       customers: [],
       action: "lists",
       form: {
+        id: "",
         name: "",
         email: "",
         phone: "",
       },
       updateform: {
+        id: "",
         name: "",
         email: "",
         phone: "",
@@ -57,6 +59,11 @@ export default class Customers extends React.Component {
               onClick={(e) => {
                 e.preventDefault();
                 this.handleAction("update");
+                this.setState({
+                  updateform: {
+                    id: customer.id,
+                  },
+                });
               }}
               data-id={customer.id}
             >
@@ -67,11 +74,8 @@ export default class Customers extends React.Component {
             <a
               href="#"
               className="btn btn-danger btn-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                this.deleteValue();
-              }}
               data-id={customer.id}
+              onClick={this.deleteValue}
             >
               Xoá
             </a>
@@ -218,7 +222,11 @@ export default class Customers extends React.Component {
                   onChange={this.handleUpdateValue}
                 />
               </div>
-              <button type="submit" className="btn btn-primary">
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onSubmit={this.updateValue}
+              >
                 Lưu thay đổi
               </button>
             </form>
@@ -291,7 +299,6 @@ export default class Customers extends React.Component {
     if (Object.keys(errors).length) {
       msg = "Vui lòng kiểm tra các lỗi bên dưới";
     } else {
-      //post api
       fetch(this.customersApi, {
         method: "POST",
         headers: {
@@ -304,6 +311,7 @@ export default class Customers extends React.Component {
           if (typeof customer === "object") {
             this.setState({
               form: {
+                id: "",
                 name: "",
                 email: "",
                 phone: "",
@@ -332,6 +340,7 @@ export default class Customers extends React.Component {
   };
   handleUpdateValue = (e) => {
     e.preventDefault();
+    console.clear()
     const data = { ...this.state.updateform };
 
     data[e.target.name] = e.target.value;
@@ -343,7 +352,7 @@ export default class Customers extends React.Component {
 
   updateValue = (e) => {
     e.preventDefault();
-    fetch(this.customersApi + "1", {
+    fetch(`${this.customersApi}${this.state.updateform.id}`, {
       method: "PUT",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -351,30 +360,18 @@ export default class Customers extends React.Component {
       body: JSON.stringify(this.state.updateform),
     })
       .then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((err) => console.log(err));
     this.handleAction("list");
   };
 
   deleteValue = (e) => {
-    // e.preventDefault();
-    fetch(this.customersApi + "1", {
+    e.preventDefault();
+    fetch(`${this.customersApi}${e.target.dataset.id}`, {
       method: "DELETE",
       headers: {
         "Content-type": "application/json",
       },
     })
-      .then((res) => {
-        if (res.ok) {
-          console.log("HTTP request successful");
-        } else {
-          console.log("HTTP request unsuccessful");
-        }
-        return res;
-      })
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.log(error));
+      .then((res) => res.json());
   };
 
   render() {
