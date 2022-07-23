@@ -1,7 +1,7 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 export default class Customers extends React.Component {
   constructor(props) {
     super(props);
@@ -44,54 +44,8 @@ export default class Customers extends React.Component {
   componentDidUpdate() {
     this.getUsers();
   }
-  submit = () => {
-    confirmAlert({
-      title: 'Confirm to submit',
-      message: 'Are you sure to do this.',
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: () => alert('Đã submit')
-        },
-        {
-          label: 'No',
-          onClick: () => alert('Đã hủy submit')
-        }
-      ]
-    });
-  };
-  update = () => {
-    confirmAlert({
-      title: 'Confirm to update',
-      message: 'Are you sure to do this.',
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: () => alert('Đã update')
-        },
-        {
-          label: 'No',
-          onClick: () => alert('Đã hủy update')
-        }
-      ]
-    });
-  };
-  delete = () => {
-    confirmAlert({
-      title: 'Confirm to delete',
-      message: 'Are you sure to do this.',
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: () => alert('Đã delete')
-        },
-        {
-          label: 'No',
-          onClick: () => alert('Đã hủy delete')
-        }
-      ]
-    });
-  };
+
+
 
   customersRender = () => {
     let count = 0;
@@ -214,7 +168,11 @@ export default class Customers extends React.Component {
                   false
                 )}
               </div>
-              <button type="submit" className="btn btn-primary" onClick={this.submit}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onClick={this.submit}
+              >
                 Thêm mới
               </button>
             </form>
@@ -328,55 +286,70 @@ export default class Customers extends React.Component {
 
   handleAddSubmit = (e) => {
     e.preventDefault();
+      confirmAlert({
+        title: "Confirm to submit",
+        message: "Are you sure to do this.",
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              const errors = {};
 
-    const errors = {};
-
-    let msg = "";
-
-    const { name, email, phone } = this.state.form;
-
-    if (name === "") {
-      errors.name = "Vui lòng nhập tên";
-    }
-
-    if (email === "") {
-      errors.email = "Vui lòng nhập email";
-    }
-
-    if (phone === "") {
-      errors.phone = "Vui lòng nhập điện thoại";
-    }
-
-    if (Object.keys(errors).length) {
-      msg = "Vui lòng kiểm tra các lỗi bên dưới";
-    } else {
-      fetch(this.customersApi, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(this.state.form),
-      })
-        .then((response) => response.json())
-        .then((customer) => {
-          if (typeof customer === "object") {
-            this.setState({
-              form: {
-                id: "",
-                name: "",
-                email: "",
-                phone: "",
-              },
-            });
-            this.handleAction("lists");
-          }
-        });
-    }
-
-    this.setState({
-      errors: errors,
-      msg: msg,
-    });
+              let msg = "";
+          
+              const { name, email, phone } = this.state.form;
+          
+              if (name === "") {
+                errors.name = "Vui lòng nhập tên";
+              }
+          
+              if (email === "") {
+                errors.email = "Vui lòng nhập email";
+              }
+          
+              if (phone === "") {
+                errors.phone = "Vui lòng nhập điện thoại";
+              }
+          
+              if (Object.keys(errors).length) {
+                msg = "Vui lòng kiểm tra các lỗi bên dưới";
+              } else {
+                fetch(this.customersApi, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(this.state.form),
+                })
+                  .then((response) => response.json())
+                  .then((customer) => {
+                    if (typeof customer === "object") {
+                      this.setState({
+                        form: {
+                          id: "",
+                          name: "",
+                          email: "",
+                          phone: "",
+                        },
+                      });
+                      this.handleAction("lists");
+                    }
+                  });
+              }
+          
+              this.setState({
+                errors: errors,
+                msg: msg,
+              });
+            },
+          },
+          {
+            label: "No",
+            onClick: () => alert("Đã hủy submit"),
+          },
+        ],
+      });
+   
   };
 
   changeValue = (e) => {
@@ -391,7 +364,7 @@ export default class Customers extends React.Component {
   };
   handleUpdateValue = (e) => {
     e.preventDefault();
-    console.clear()
+    console.clear();
     const data = { ...this.state.updateform };
 
     data[e.target.name] = e.target.value;
@@ -403,27 +376,52 @@ export default class Customers extends React.Component {
 
   updateValue = (e) => {
     e.preventDefault();
-    fetch(`${this.customersApi}${this.state.updateform.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify(this.state.updateform),
-    })
-      .then((response) => response.json())
-    this.handleAction("list");
+      confirmAlert({
+        title: "Confirm to update",
+        message: "Are you sure to do this.",
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () =>  fetch(`${this.customersApi}${this.state.updateform.id}`, {
+              method: "PUT",
+              headers: {
+                "Content-type": "application/json; charset=UTF-8",
+              },
+              body: JSON.stringify(this.state.updateform),
+            }).then((response) => response.json())
+            ,
+          },
+          {
+            label: "No",
+            onClick: () => alert("Đã hủy update"),
+          },
+        ],
+      });
+      this.handleAction("list")
   };
 
   deleteValue = (e) => {
     e.preventDefault();
-    this.delete()
-    fetch(`${this.customersApi}${e.target.dataset.id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-type": "application/json",
-      },
-    })
-      .then((res) => res.json());
+    confirmAlert({
+      title: "Confirm to delete",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () =>
+            fetch(`${this.customersApi}${e.target.dataset.id}`, {
+              method: "DELETE",
+              headers: {
+                "Content-type": "application/json",
+              },
+            }).then((res) => res.json()),
+        },
+        {
+          label: "No",
+          onClick: () => alert("Đã hủy delete"),
+        },
+      ],
+    });
   };
 
   render() {
