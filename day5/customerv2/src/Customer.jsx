@@ -2,6 +2,7 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import "./customer.css"
 export default class Customers extends React.Component {
   constructor(props) {
     super(props);
@@ -9,46 +10,181 @@ export default class Customers extends React.Component {
       customers: [],
       action: "lists",
       form: {
-        id: "",
-        name: "",
-        email: "",
-        phone: "",
-      },
-      updateform: {
-        id: "",
+        id: 0,
         name: "",
         email: "",
         phone: "",
       },
       errors: {},
       msg: "",
+      msgType: "danger",
+      isLoading: true,
+      paginate: {
+        maxPage: 0,
+        currentPage: 1,
+      },
     };
 
-    this.customersApi = "https://apiforlearn.herokuapp.com/customers/";
+    this.customersApi = "https://apiforlearn.herokuapp.com/customers";
+
+    this.perPage = 3;
   }
 
-  getUsers = () => {
+  setMaxPage = () => {
     fetch(this.customersApi)
       .then((response) => response.json())
       .then((customers) => {
+        const maxPage = Math.ceil(customers.length / this.perPage);
+
+        const paginate = { ...this.state.paginate };
+
+        paginate.maxPage = maxPage;
+
         this.setState({
-          customers: customers,
+          paginate: paginate,
         });
       });
   };
 
+  getUsers = () => {
+    fetch(
+      this.customersApi +
+        `?_page=${this.state.paginate.currentPage}&_limit=${this.perPage}`
+    )
+      .then((response) => response.json())
+      .then((customers) => {
+        this.setState({
+          customers: customers,
+          isLoading: false,
+        });
+      });
+  };
+
+  getUser = (userId) => {
+    fetch(this.customersApi + "/" + userId)
+      .then((response) => response.json())
+      .then((customer) => {
+        this.setState({
+          form: customer,
+        });
+      });
+  };
+
+  deleteUser = (userId) => {
+    fetch(this.customersApi + "/" + userId, {
+      method: "DELETE",
+    });
+  };
+
   componentDidMount() {
     this.getUsers();
+    this.setMaxPage();
   }
 
   componentDidUpdate() {
     this.getUsers();
   }
 
+  paginateRender = () => {
+    let paginateItem = [];
+    let active;
+    const currentPage = this.state.paginate.currentPage;
 
+    for (let page = 1; page <= this.state.paginate.maxPage; page++) {
+      active = parseInt(page) === parseInt(currentPage) ? "active" : "";
+      paginateItem.push(
+        <li
+          key={page}
+          className={`page-item ${active}`}
+          onClick={(e) => {
+            e.preventDefault();
+            this.goPaginate(page);
+          }}
+        >
+          <a className="page-link" href="#">
+            {page}
+          </a>
+        </li>
+      );
+    }
+
+    return (
+      <nav
+        aria-label="Page navigation example"
+        className="d-flex justify-content-end"
+      >
+        <ul className="pagination">
+          {this.state.paginate.currentPage > 1 ? (
+            <li className="page-item">
+              <a className="page-link" href="#" onClick={this.prevPaginate}>
+                Trước
+              </a>
+            </li>
+          ) : (
+            false
+          )}
+
+          {paginateItem}
+          {this.state.paginate.currentPage < this.state.paginate.maxPage ? (
+            <li className="page-item">
+              <a className="page-link" href="#" onClick={this.nextPaginate}>
+                Sau
+              </a>
+            </li>
+          ) : (
+            false
+          )}
+        </ul>
+      </nav>
+    );
+  };
+
+  goPaginate = (page) => {
+    const paginate = { ...this.state.paginate };
+
+    paginate.currentPage = page;
+    this.setState({
+      paginate: paginate,
+      isLoading: true
+    });
+  };
+
+  prevPaginate = (e) => {
+    e.preventDefault();
+    let page = this.state.paginate.currentPage;
+    page = page - 1;
+    if (page < 0) {
+      page = 1;
+    }
+
+    this.goPaginate(page);
+  };
+
+  nextPaginate = (e) => {
+    e.preventDefault();
+    let page = this.state.paginate.currentPage;
+    page = page + 1;
+    if (page > this.state.paginate.maxPage) {
+      page = this.state.paginate.maxPage;
+    }
+
+    this.goPaginate(page);
+  };
 
   customersRender = () => {
     let count = 0;
+    if (this.state.isLoading) {
+      return (
+        <tr>
+          <td colSpan={6}>
+            <div className="alert alert-success text-center">
+              Đang tải dữ liệu...
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
     return this.state.customers.map((customer) => {
       return (
         <tr key={customer.id}>
@@ -62,12 +198,7 @@ export default class Customers extends React.Component {
               className="btn btn-warning btn-sm"
               onClick={(e) => {
                 e.preventDefault();
-                this.handleAction("update");
-                this.setState({
-                  updateform: {
-                    id: customer.id,
-                  },
-                });
+                this.handleAction("update", e.target.dataset.id);
               }}
               data-id={customer.id}
             >
@@ -77,9 +208,13 @@ export default class Customers extends React.Component {
           <td>
             <a
               href="#"
-              className="btn btn-danger btn-sm"
               data-id={customer.id}
-              onClick={this.deleteValue}
+              onClick={(e) => {
+                e.preventDefault();
+
+                this.handleDeleteSubmit(e.target.dataset.id);
+              }}
+              className="btn btn-danger btn-sm"
             >
               Xoá
             </a>
@@ -107,7 +242,7 @@ export default class Customers extends React.Component {
             </button>
             <hr />
             {this.state.msg !== "" ? (
-              <div className="alert alert-danger text-center">
+              <div className={`alert alert-${this.state.msgType} text-center`}>
                 {this.state.msg}
               </div>
             ) : (
@@ -168,11 +303,7 @@ export default class Customers extends React.Component {
                   false
                 )}
               </div>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                onClick={this.submit}
-              >
+              <button type="submit" className="btn btn-primary">
                 Thêm mới
               </button>
             </form>
@@ -194,48 +325,69 @@ export default class Customers extends React.Component {
               Quay lại
             </button>
             <hr />
-            <form onSubmit={this.updateValue}>
+            {this.state.msg !== "" ? (
+              <div className={`alert alert-${this.state.msgType} text-center`}>
+                {this.state.msg}
+              </div>
+            ) : (
+              false
+            )}
+            <form onSubmit={this.handleUpdateSubmit}>
               <div className="mb-3">
                 <label>Tên</label>
                 <input
                   type="text"
+                  name="name"
                   className="form-control"
                   placeholder="Tên"
-                  name="name"
-                  value={this.state.updateform.name}
-                  onChange={this.handleUpdateValue}
+                  value={this.state.form.name}
+                  onChange={this.changeValue}
                 />
+                {this.state.errors.name ? (
+                  <span style={{ color: "red" }}>{this.state.errors.name}</span>
+                ) : (
+                  false
+                )}
               </div>
 
               <div className="mb-3">
                 <label>Email</label>
                 <input
                   type="email"
+                  name="email"
                   className="form-control"
                   placeholder="Email"
-                  name="email"
-                  value={this.state.updateform.email}
-                  onChange={this.handleUpdateValue}
+                  value={this.state.form.email}
+                  onChange={this.changeValue}
                 />
+                {this.state.errors.email ? (
+                  <span style={{ color: "red" }}>
+                    {this.state.errors.email}
+                  </span>
+                ) : (
+                  false
+                )}
               </div>
 
               <div className="mb-3">
                 <label>Điện thoại</label>
                 <input
                   type="text"
+                  name="phone"
                   className="form-control"
                   placeholder="Điện thoại"
-                  name="phone"
-                  value={this.state.updateform.phone}
-                  onChange={this.handleUpdateValue}
+                  value={this.state.form.phone}
+                  onChange={this.changeValue}
                 />
+                {this.state.errors.phone ? (
+                  <span style={{ color: "red" }}>
+                    {this.state.errors.phone}
+                  </span>
+                ) : (
+                  false
+                )}
               </div>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                onSubmit={this.updateValue}
-                onClick={this.update}
-              >
+              <button type="submit" className="btn btn-primary">
                 Lưu thay đổi
               </button>
             </form>
@@ -271,14 +423,20 @@ export default class Customers extends React.Component {
               </thead>
               <tbody>{this.customersRender()}</tbody>
             </table>
+            {this.paginateRender()}
           </>
         );
         break;
     }
+
     return jsx;
   };
 
-  handleAction = (action) => {
+  handleAction = (action, id = 0) => {
+    if (id !== 0) {
+      this.getUser(id);
+    }
+
     this.setState({
       action: action,
     });
@@ -286,70 +444,124 @@ export default class Customers extends React.Component {
 
   handleAddSubmit = (e) => {
     e.preventDefault();
-      confirmAlert({
-        title: "Confirm to submit",
-        message: "Are you sure to do this.",
-        buttons: [
-          {
-            label: "Yes",
-            onClick: () => {
-              const errors = {};
 
-              let msg = "";
-          
-              const { name, email, phone } = this.state.form;
-          
-              if (name === "") {
-                errors.name = "Vui lòng nhập tên";
-              }
-          
-              if (email === "") {
-                errors.email = "Vui lòng nhập email";
-              }
-          
-              if (phone === "") {
-                errors.phone = "Vui lòng nhập điện thoại";
-              }
-          
-              if (Object.keys(errors).length) {
-                msg = "Vui lòng kiểm tra các lỗi bên dưới";
-              } else {
-                fetch(this.customersApi, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(this.state.form),
-                })
-                  .then((response) => response.json())
-                  .then((customer) => {
-                    if (typeof customer === "object") {
-                      this.setState({
-                        form: {
-                          id: "",
-                          name: "",
-                          email: "",
-                          phone: "",
-                        },
-                      });
-                      this.handleAction("lists");
-                    }
-                  });
-              }
-          
-              this.setState({
-                errors: errors,
-                msg: msg,
-              });
-            },
-          },
-          {
-            label: "No",
-            onClick: () => alert("Đã hủy submit"),
-          },
-        ],
-      });
-   
+    const errors = {};
+
+    let msg = "";
+
+    const { name, email, phone } = this.state.form;
+
+    if (name === "") {
+      errors.name = "Vui lòng nhập tên";
+    }
+
+    if (email === "") {
+      errors.email = "Vui lòng nhập email";
+    }
+
+    if (phone === "") {
+      errors.phone = "Vui lòng nhập điện thoại";
+    }
+
+    if (Object.keys(errors).length) {
+      msg = "Vui lòng kiểm tra các lỗi bên dưới";
+    } else {
+      fetch(this.customersApi, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this.state.form),
+      })
+        .then((response) => response.json())
+        .then((customer) => {
+          if (typeof customer === "object") {
+            this.setState({
+              form: {
+                name: "",
+                email: "",
+                phone: "",
+              },
+            });
+            this.handleAction("lists");
+          }
+        });
+    }
+
+    this.setState({
+      errors: errors,
+      msg: msg,
+    });
+  };
+
+  handleUpdateSubmit = (e) => {
+    e.preventDefault();
+
+    const errors = {};
+
+    let msg = "";
+
+    const { name, email, phone } = this.state.form;
+
+    if (name === "") {
+      errors.name = "Vui lòng nhập tên";
+    }
+
+    if (email === "") {
+      errors.email = "Vui lòng nhập email";
+    }
+
+    if (phone === "") {
+      errors.phone = "Vui lòng nhập điện thoại";
+    }
+
+    if (Object.keys(errors).length) {
+      msg = "Vui lòng kiểm tra các lỗi bên dưới";
+    } else {
+      fetch(this.customersApi + "/" + this.state.form.id, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this.state.form),
+      })
+        .then((response) => response.json())
+        .then((customer) => {
+          if (typeof customer === "object") {
+            this.setState({
+              msg: "Cập nhật thành công",
+              msgType: "success",
+            });
+          }
+        });
+    }
+
+    this.setState({
+      errors: errors,
+      msg: msg,
+    });
+  };
+
+  handleDeleteSubmit = (id) => {
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (
+          <div className="custom-ui">
+            <h1>Are you sure?</h1>
+            <p>You want to delete this file?</p>
+            <button onClick={onClose}>No</button>
+            <button
+              onClick={() => {
+                this.deleteUser(id);
+                onClose();
+              }}
+            >
+              Yes, Delete it!
+            </button>
+          </div>
+        );
+      },
+    });
   };
 
   changeValue = (e) => {
@@ -360,67 +572,6 @@ export default class Customers extends React.Component {
 
     this.setState({
       form: data,
-    });
-  };
-  handleUpdateValue = (e) => {
-    e.preventDefault();
-    console.clear();
-    const data = { ...this.state.updateform };
-
-    data[e.target.name] = e.target.value;
-
-    this.setState({
-      updateform: data,
-    });
-  };
-
-  updateValue = (e) => {
-    e.preventDefault();
-      confirmAlert({
-        title: "Confirm to update",
-        message: "Are you sure to do this.",
-        buttons: [
-          {
-            label: "Yes",
-            onClick: () =>  fetch(`${this.customersApi}${this.state.updateform.id}`, {
-              method: "PUT",
-              headers: {
-                "Content-type": "application/json; charset=UTF-8",
-              },
-              body: JSON.stringify(this.state.updateform),
-            }).then((response) => response.json())
-            ,
-          },
-          {
-            label: "No",
-            onClick: () => alert("Đã hủy update"),
-          },
-        ],
-      });
-      this.handleAction("list")
-  };
-
-  deleteValue = (e) => {
-    e.preventDefault();
-    confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure to do this.",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () =>
-            fetch(`${this.customersApi}${e.target.dataset.id}`, {
-              method: "DELETE",
-              headers: {
-                "Content-type": "application/json",
-              },
-            }).then((res) => res.json()),
-        },
-        {
-          label: "No",
-          onClick: () => alert("Đã hủy delete"),
-        },
-      ],
     });
   };
 
